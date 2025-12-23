@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nizhal - Security Warning</title>
+    <link rel="stylesheet" href="warning.css">
+</head>
+<body>
+    <div class="shadow-container">
+        <div class="shadow-header">
+            <h1>NIZHAL</h1>
+            <p>The Shadow has intercepted a threat.</p>
+        </div>
+        
+        <div class="threat-card">
+            <div class="icon-pulse">!</div>
+            <h2 id="threat-type">Suspicious Vibe Detected</h2>
+            <p id="threat-reason">The URL matches known malicious patterns.</p>
+            <p class="url-display" id="threat-url">example.com</p>
+        </div>
+
+        <div class="actions">
+            <button id="btn-back" class="btn primary">Return to Safety</button>
+            <button id="btn-proceed" class="btn secondary">Proceed Unsafe</button>
+        </div>
+    </div>
+    <script>
+        // Simple script to populate details from URL params
+        const params = new URLSearchParams(window.location.search);
+        document.getElementById('threat-type').textContent = params.get('type') || 'Unknown Threat';
+        document.getElementById('threat-reason').textContent = params.get('reason') || 'Detected by Nizhal heuristics.';
+        document.getElementById('threat-url').textContent = params.get('url') || '';
+
+        document.getElementById('btn-back').addEventListener('click', () => {
+            history.back();
+        });
+        
+        document.getElementById('btn-proceed').addEventListener('click', () => {
+            // Need a way to bypass loop if we just go back. 
+            // In a real app we'd whitelist this temporarily.
+            // For now, simple redirect back (which might loop if we don't handle it).
+            const rawUrl = params.get('url');
+            if(rawUrl) window.location.href = rawUrl;
+        });
+    </script>
+</body>
+</html>

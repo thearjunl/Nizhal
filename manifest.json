@@ -1,0 +1,32 @@
+{
+    "manifest_version": 3,
+    "name": "Nizhal",
+    "version": "1.0.0",
+    "description": "A stealthy, high-performance security extension that acts as a protective shadow.",
+    "permissions": [
+        "webNavigation",
+        "storage",
+        "notifications"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "warning.html",
+                "warning.css"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
+    "icons": {
+        "128": "icons/icon128.png"
+    }
+}
