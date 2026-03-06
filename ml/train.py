@@ -5,9 +5,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
-
 import joblib
-data = pd.read_csv("dataset_phishing.csv")
+
+data = pd.read_csv("data/dataset_phishing.csv")
 print("Dataset shape:", data.shape)
 
 
@@ -17,9 +17,25 @@ data["status"] = data["status"].map({
 })
 
 data = data.dropna(subset=["status"])
+selected_features=[
+    'length_url',
+    'length_hostname',
+    'nb_dots',
+    'nb_hyphens',
+    'nb_at',
+    'nb_qm',
+    'nb_and',
+    'nb_eq',
+    'nb_percent',
+    'nb_slash',
+    'nb_www',
+    'nb_com',
+    'ratio_digits_url',
+    'nb_subdomains'
+]
+X=data[selected_features]
+X=X.fillna(0)
 y = data["status"]
-X = data.drop(["status", "url"], axis=1)
-X = X.fillna(0)
 
 X_train, X_test, y_train, y_test = train_test_split(
     X,
