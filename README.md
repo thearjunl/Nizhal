@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="icons/icon128.png" alt="Nizhal Logo" width="128">
+  <img src="icons/icon128.png?v=2" alt="Nizhal Logo" width="128">
   <h1>Nizhal</h1>
   <p><em>A stealthy, high-performance security extension that acts as a protective shadow.</em></p>
 </div>
