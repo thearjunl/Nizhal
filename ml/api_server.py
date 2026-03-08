@@ -5,6 +5,12 @@ import joblib
 import pandas as pd
 from feature_extraction import extract_features
 import os
+import requests
+from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+
+load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_SAFE_BROWSING_API_KEY")
 
 app = FastAPI(title="Nizhal Phishing Detection API")
 
@@ -44,11 +50,34 @@ def predict_url(request: URLRequest):
     if model is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
 
-    # Extract features using the existing feature extraction logic
+    # Feature 3: External Threat APIs (Google Safe Browsing)
+    if GOOGLE_API_KEY:
+        try:
+            gsb_url = f"https://safebrowsing.googleapis.com/v4/threatMatches:find?key={GOOGLE_API_KEY}"
+            payload = {
+                "client": {"clientId": "nizhal-extension", "clientVersion": "1.0.0"},
+                "threatInfo": {
+                    "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION"],
+                    "platformTypes": ["ANY_PLATFORM"],
+                    "threatEntryTypes": ["URL"],
+                    "threatEntries": [{"url": request.url}]
+                }
+            }
+            resp = requests.post(gsb_url, json=payload, timeout=2)
+            if resp.status_code == 200:
+                data = resp.json()
+                if "matches" in data and len(data["matches"]) > 0:
+                    return PredictionResponse(
+                        url=request.url,
+                        isMalicious=True,
+                        confidence=1.0,
+                        features={"source": "Google Safe Browsing API"}
+                    )
+        except Exception as e:
+            print(f"Safe Browsing API Error: {e}")
+
+    # Fallback to ML Model: Extract features using the existing feature extraction logic
     features_dict = extract_features(request.url)
-    
-    # The models were trained expecting specific feature ordering from pandas
-    # The features are: 'length_url', 'length_hostname', 'nb_dots', 'nb_hyphens', 'nb_at', 'nb_qm', 'nb_and', 'nb_eq', 'nb_percent', 'nb_slash', 'nb_www', 'nb_com', 'ratio_digits_url', 'nb_subdomains'
     feature_df = pd.DataFrame([features_dict])
     
     # Run prediction (1 for phishing, 0 for legitimate)
@@ -57,6 +86,28 @@ def predict_url(request: URLRequest):
     
     is_malicious = bool(prediction == 1)
     confidence = float(probabilities[1] if is_malicious else probabilities[0])
+
+    # Feature 2: NLP/Text Analysis
+    # Scrape the page text to look for urgent or suspicious keywords
+    try:
+        page_resp = requests.get(request.url, timeout=2) # Short timeout
+        soup = BeautifulSoup(page_resp.text, 'html.parser')
+        page_text = soup.get_text().lower()
+        
+        # Simple Keyword Density Check
+        suspicious_keywords = ["urgent", "password", "reset", "login", "suspended", "verify", "account", "unauthorized", "security"]
+        keyword_hits = sum(1 for word in suspicious_keywords if word in page_text)
+        
+        if keyword_hits >= 3:
+            is_malicious = True
+            confidence = min(1.0, confidence + 0.3)
+            features_dict['nlp_flagged'] = True
+        else:
+            features_dict['nlp_flagged'] = False
+            
+    except Exception as e:
+        features_dict['nlp_flagged'] = False
+        features_dict['scrape_error'] = str(e)
 
     return PredictionResponse(
         url=request.url,
@@ -67,4 +118,4 @@ def predict_url(request: URLRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api_server:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("api_server:app", host="0.0.0.0", port=8000, reload=True)

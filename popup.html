@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nizhal Dashboard</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+    <div class="header">
+        <img class="logo" src="icons/icon128.png" alt="Nizhal">
+        <h1>NIZHAL</h1>
+    </div>
+
+    <div class="status-container">
+        <span class="status-indicator active" id="status-dot"></span>
+        <span id="status-text">Protection Active</span>
+
+        <label class="switch">
+            <input type="checkbox" id="toggle-protection" checked>
+            <span class="slider round"></span>
+        </label>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="stat-scans">0</div>
+            <div class="stat-label">URLs Scanned</div>
+        </div>
+        <div class="stat-card alert">
+            <div class="stat-value" id="stat-threats">0</div>
+            <div class="stat-label">Threats Blocked</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <button id="btn-options" class="btn">Settings</button>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>

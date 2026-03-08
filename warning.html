@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nizhal - Security Warning</title>
     <link rel="stylesheet" href="warning.css">
 </head>
+
 <body>
     <div class="shadow-container">
         <div class="shadow-header">
@@ -13,7 +15,7 @@
             <h1>NIZHAL</h1>
             <p>The Shadow has intercepted a threat.</p>
         </div>
-        
+
         <div class="threat-card">
             <div class="icon-pulse">!</div>
             <h2 id="threat-type">Suspicious Vibe Detected</h2>
@@ -36,14 +38,29 @@
         document.getElementById('btn-back').addEventListener('click', () => {
             history.back();
         });
-        
+
         document.getElementById('btn-proceed').addEventListener('click', () => {
-            // Need a way to bypass loop if we just go back. 
-            // In a real app we'd whitelist this temporarily.
-            // For now, simple redirect back (which might loop if we don't handle it).
             const rawUrl = params.get('url');
-            if(rawUrl) window.location.href = rawUrl;
+            if (rawUrl) {
+                try {
+                    const host = new URL(rawUrl).hostname;
+                    chrome.storage.local.get(['nizhal_whitelist'], (result) => {
+                        const whitelist = result.nizhal_whitelist || [];
+                        if (!whitelist.includes(host)) {
+                            whitelist.push(host);
+                            chrome.storage.local.set({ nizhal_whitelist: whitelist }, () => {
+                                window.location.href = rawUrl;
+                            });
+                        } else {
+                            window.location.href = rawUrl;
+                        }
+                    });
+                } catch (e) {
+                    window.location.href = rawUrl;
+                }
+            }
         });
     </script>
 </body>
+
 </html>
