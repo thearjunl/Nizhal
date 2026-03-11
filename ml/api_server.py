@@ -1,6 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import joblib
 import pandas as pd
 from feature_extraction import extract_features
@@ -16,8 +20,18 @@ load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_SAFE_BROWSING_API_KEY")
 
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+RATE_LIMIT = os.getenv("RATE_LIMIT", "30/minute")
 
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="Nizhal Phishing Detection API")
+app.state.limiter = limiter
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Rate limit exceeded. Try again later."}
+    )
 
 # Configure CORS for the Chrome Extension
 app.add_middleware(
@@ -82,7 +96,8 @@ class PredictionResponse(BaseModel):
     features: dict
 
 @app.post("/predict", response_model=PredictionResponse)
-def predict_url(request: URLRequest):
+@limiter.limit(RATE_LIMIT)
+def predict_url(request: URLRequest, req: Request):
     if model is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
 
