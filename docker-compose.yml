@@ -10,4 +10,7 @@ services:
       - "8000:8000"
     env_file:
       - ./ml/.env
+    # To use your own certificates, uncomment below and place cert.pem/key.pem in ./ml/certs/
+    # volumes:
+    #   - ./ml/certs:/app/certs:ro
     restart: unless-stopped

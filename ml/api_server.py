@@ -172,4 +172,7 @@ def predict_url(request: URLRequest, req: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api_server:app", host="0.0.0.0", port=8000, reload=True)
+    ssl_keyfile = os.getenv("SSL_KEYFILE", "/app/certs/key.pem")
+    ssl_certfile = os.getenv("SSL_CERTFILE", "/app/certs/cert.pem")
+    uvicorn.run("api_server:app", host="0.0.0.0", port=8000, reload=True,
+                ssl_keyfile=ssl_keyfile, ssl_certfile=ssl_certfile)
