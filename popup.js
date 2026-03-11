@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnOptions.addEventListener('click', () => {
         const isVisible = settingsPanel.style.display !== 'none';
         settingsPanel.style.display = isVisible ? 'none' : 'block';
-        btnOptions.textContent = isVisible ? 'Settings' : 'Close Settings';
+        btnOptions.innerHTML = isVisible ? '<span class="btn-icon">&#9881;</span> Settings' : '<span class="btn-icon">&#10005;</span> Close Settings';
         if (!isVisible) loadWhitelist();
     });
 
@@ -95,12 +95,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function updateStatusUI(isActive) {
+        const statusBar = document.getElementById('status-bar');
         if (isActive) {
             statusText.textContent = "Protection Active";
             statusDot.classList.add('active');
+            statusBar.classList.add('active-glow');
         } else {
             statusText.textContent = "Protection Disabled";
             statusDot.classList.remove('active');
+            statusBar.classList.remove('active-glow');
         }
     }
 });

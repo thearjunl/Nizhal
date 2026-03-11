@@ -10,48 +10,64 @@
 </head>
 
 <body>
-    <div class="header">
-        <img class="logo" src="icons/icon128.png" alt="Nizhal">
-        <h1>NIZHAL</h1>
-    </div>
-
-    <div class="status-container">
-        <span class="status-indicator active" id="status-dot"></span>
-        <span id="status-text">Protection Active</span>
-
-        <label class="switch">
-            <input type="checkbox" id="toggle-protection" checked>
-            <span class="slider round"></span>
-        </label>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-value" id="stat-scans">0</div>
-            <div class="stat-label">URLs Scanned</div>
+    <div class="dashboard">
+        <div class="header">
+            <div class="header-left">
+                <img class="logo" src="icons/icon128.png" alt="Nizhal">
+                <div class="header-text">
+                    <h1>NIZHAL</h1>
+                    <span class="tagline">Your protective shadow</span>
+                </div>
+            </div>
+            <label class="switch" title="Toggle protection">
+                <input type="checkbox" id="toggle-protection" checked>
+                <span class="slider round"></span>
+            </label>
         </div>
-        <div class="stat-card alert">
-            <div class="stat-value" id="stat-threats">0</div>
-            <div class="stat-label">Threats Blocked</div>
+
+        <div class="status-bar" id="status-bar">
+            <span class="status-indicator active" id="status-dot"></span>
+            <span id="status-text">Protection Active</span>
         </div>
-    </div>
 
-    <div class="footer">
-        <button id="btn-options" class="btn">Settings</button>
-    </div>
-
-    <div class="settings-panel" id="settings-panel" style="display: none;">
-        <h2 class="settings-title">Settings</h2>
-
-        <div class="setting-group">
-            <label class="setting-label">Whitelisted Domains</label>
-            <div class="whitelist-container" id="whitelist-container">
-                <p class="empty-msg" id="whitelist-empty">No domains whitelisted.</p>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">&#128269;</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="stat-scans">0</div>
+                    <div class="stat-label">URLs Scanned</div>
+                </div>
+            </div>
+            <div class="stat-card alert">
+                <div class="stat-icon">&#128737;</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="stat-threats">0</div>
+                    <div class="stat-label">Threats Blocked</div>
+                </div>
             </div>
         </div>
 
-        <div class="setting-group">
-            <button id="btn-clear-stats" class="btn btn-danger">Reset Statistics</button>
+        <button id="btn-options" class="btn btn-settings">
+            <span class="btn-icon">&#9881;</span> Settings
+        </button>
+
+        <div class="settings-panel" id="settings-panel" style="display: none;">
+            <h2 class="settings-title">Settings</h2>
+
+            <div class="setting-group">
+                <label class="setting-label">Whitelisted Domains</label>
+                <div class="whitelist-container" id="whitelist-container">
+                    <p class="empty-msg" id="whitelist-empty">No domains whitelisted.</p>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <button id="btn-clear-stats" class="btn btn-danger">Reset Statistics</button>
+            </div>
+        </div>
+
+        <div class="footer-brand">
+            <span>Nizhal v1.0.0</span>
         </div>
     </div>
 
