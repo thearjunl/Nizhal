@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Default Load State
     chrome.storage.local.get(['nizhal_active', 'stats_scans', 'stats_threats'], (result) => {
+        if (chrome.runtime.lastError) {
+            console.error('Failed to load state:', chrome.runtime.lastError.message);
+            return;
+        }
         // Active status
         const isActive = result.nizhal_active !== false; // Default true
         toggleProtection.checked = isActive;
@@ -48,6 +52,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function loadWhitelist() {
         chrome.storage.local.get(['nizhal_whitelist'], (result) => {
+            if (chrome.runtime.lastError) {
+                console.error('Failed to load whitelist:', chrome.runtime.lastError.message);
+                return;
+            }
             const whitelist = result.nizhal_whitelist || [];
             // Clear previous entries (keep the empty message element)
             whitelistContainer.querySelectorAll('.whitelist-item').forEach(el => el.remove());
@@ -70,6 +78,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 removeBtn.className = 'btn-remove';
                 removeBtn.addEventListener('click', () => {
                     chrome.storage.local.get(['nizhal_whitelist'], (res) => {
+                        if (chrome.runtime.lastError) {
+                            console.error('Failed to update whitelist:', chrome.runtime.lastError.message);
+                            return;
+                        }
                         const updated = (res.nizhal_whitelist || []).filter(d => d !== domain);
                         chrome.storage.local.set({ nizhal_whitelist: updated }, () => loadWhitelist());
                     });
