@@ -25,7 +25,8 @@
         {
             "resources": [
                 "warning.html",
-                "warning.css"
+                "warning.css",
+                "warning.js"
             ],
             "matches": [
                 "<all_urls>"
