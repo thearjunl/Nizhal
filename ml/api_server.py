@@ -106,7 +106,7 @@ class PredictionResponse(BaseModel):
 
 @app.post("/predict", response_model=PredictionResponse)
 @limiter.limit(RATE_LIMIT)
-def predict_url(request: URLRequest, req: Request):
+def predict_url(body: URLRequest, request: Request):
     if model is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
 
@@ -120,7 +120,7 @@ def predict_url(request: URLRequest, req: Request):
                     "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION"],
                     "platformTypes": ["ANY_PLATFORM"],
                     "threatEntryTypes": ["URL"],
-                    "threatEntries": [{"url": request.url}]
+                    "threatEntries": [{"url": body.url}]
                 }
             }
             resp = requests.post(gsb_url, json=payload, timeout=2)
@@ -128,7 +128,7 @@ def predict_url(request: URLRequest, req: Request):
                 data = resp.json()
                 if "matches" in data and len(data["matches"]) > 0:
                     return PredictionResponse(
-                        url=request.url,
+                        url=body.url,
                         isMalicious=True,
                         confidence=1.0,
                         features={"source": "Google Safe Browsing API"}
@@ -137,7 +137,7 @@ def predict_url(request: URLRequest, req: Request):
             logger.error("Safe Browsing API Error: %s", e)
 
     # Fallback to ML Model: Extract features using the existing feature extraction logic
-    features_dict = extract_features(request.url)
+    features_dict = extract_features(body.url)
     feature_df = pd.DataFrame([features_dict])
     
     # Run prediction (1 for phishing, 0 for legitimate)
@@ -151,9 +151,9 @@ def predict_url(request: URLRequest, req: Request):
     # Scrape the page text to look for urgent or suspicious keywords
     # Only scrape URLs that resolve to public IP addresses to prevent SSRF
     try:
-        if not _is_public_url(request.url):
+        if not _is_public_url(body.url):
             raise ValueError("URL resolves to a non-public address")
-        page_resp = requests.get(request.url, timeout=2, allow_redirects=False) # Short timeout, no redirects
+        page_resp = requests.get(body.url, timeout=2, allow_redirects=False) # Short timeout, no redirects
         soup = BeautifulSoup(page_resp.text, 'html.parser')
         page_text = soup.get_text().lower()
         
@@ -173,7 +173,7 @@ def predict_url(request: URLRequest, req: Request):
         features_dict['scrape_error'] = str(e)
 
     return PredictionResponse(
-        url=request.url,
+        url=body.url,
         isMalicious=is_malicious,
         confidence=confidence,
         features=features_dict

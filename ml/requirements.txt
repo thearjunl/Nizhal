@@ -10,3 +10,5 @@ beautifulsoup4
 python-dotenv
 matplotlib
 seaborn
+pytest
+httpx
