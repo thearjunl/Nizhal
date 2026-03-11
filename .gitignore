@@ -1,4 +1,30 @@
-venv/
+# Python
 __pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+venv/
+
+# ML artifacts
 *.pkl
-*.pyc
+ml/model_metadata.json
+
+# Environment
+ml/.env
+.env
+
+# Certificates
+*.pem
+ml/certs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Node
+node_modules/
