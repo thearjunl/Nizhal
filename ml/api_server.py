@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
+from contextlib import asynccontextmanager
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -22,8 +23,22 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_SAFE_BROWSING_API_KEY")
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 RATE_LIMIT = os.getenv("RATE_LIMIT", "30/minute")
 
+# Load the model on startup via lifespan
+MODEL_PATH = "phishing_model.pkl"
+model = None
+
+@asynccontextmanager
+async def lifespan(app):
+    global model
+    if os.path.exists(MODEL_PATH):
+        model = joblib.load(MODEL_PATH)
+        print(f"Model loaded successfully from {MODEL_PATH}")
+    else:
+        print(f"Warning: Model not found at {MODEL_PATH}")
+    yield
+
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="Nizhal Phishing Detection API")
+app = FastAPI(title="Nizhal Phishing Detection API", lifespan=lifespan)
 app.state.limiter = limiter
 
 @app.exception_handler(RateLimitExceeded)
@@ -41,19 +56,6 @@ app.add_middleware(
     allow_methods=["POST"],
     allow_headers=["Content-Type"],
 )
-
-# Load the model on startup
-MODEL_PATH = "phishing_model.pkl"
-model = None
-
-@app.on_event("startup")
-def load_model():
-    global model
-    if os.path.exists(MODEL_PATH):
-        model = joblib.load(MODEL_PATH)
-        print(f"Model loaded successfully from {MODEL_PATH}")
-    else:
-        print(f"Warning: Model not found at {MODEL_PATH}")
 
 def _is_public_url(url: str) -> bool:
     """Check if a URL resolves to a public (non-private, non-loopback) IP address."""
