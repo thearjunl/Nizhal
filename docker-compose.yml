@@ -11,6 +11,7 @@ services:
     env_file:
       - ./ml/.env
     # To use your own certificates, uncomment below and place cert.pem/key.pem in ./ml/certs/
+    # NOTE: Copy ml/.env.example to ml/.env before running: cp ml/.env.example ml/.env
     # volumes:
     #   - ./ml/certs:/app/certs:ro
     restart: unless-stopped

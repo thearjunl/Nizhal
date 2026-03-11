@@ -36,8 +36,9 @@ The backend is fully containerized with Docker for easy deployment.
 git clone https://github.com/thearjunl/Nizhal.git
 cd Nizhal
 
-# (Optional) Add your Google Safe Browsing API Key for maximum protection
-# Edit ml/.env and add: GOOGLE_SAFE_BROWSING_API_KEY="your-key-here"
+# Create your .env file from the template
+cp ml/.env.example ml/.env
+# (Optional) Edit ml/.env to add your Google Safe Browsing API Key for maximum protection
 
 # Spin up the FastAPI backend
 docker-compose up --build
