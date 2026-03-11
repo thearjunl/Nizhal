@@ -182,3 +182,80 @@ input:checked+.slider:before {
     background: rgba(255, 255, 255, 0.05);
     color: white;
 }
+
+.settings-panel {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-title {
+    font-size: 0.9rem;
+    margin: 0 0 12px 0;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.setting-group {
+    margin-bottom: 12px;
+}
+
+.setting-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.whitelist-container {
+    background: var(--card-bg);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 8px;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.whitelist-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 6px;
+    font-size: 0.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.whitelist-item:last-child {
+    border-bottom: none;
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: var(--accent-red);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 4px;
+}
+
+.btn-remove:hover {
+    color: #ff6666;
+}
+
+.empty-msg {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin: 4px 0;
+}
+
+.btn-danger {
+    border-color: var(--accent-red);
+    color: var(--accent-red);
+}
+
+.btn-danger:hover {
+    background: rgba(255, 51, 51, 0.1);
+    color: #ff6666;
+}
