@@ -19,10 +19,10 @@ export function checkHeuristics(url) {
     }
 
     // 1. Check URL Length
-    if (url.length > 100) {
+    if (url.length > 200) {
         return {
             suspicious: true,
-            reason: 'URL Length > 100 characters'
+            reason: 'URL Length > 200 characters'
         };
     }
 
