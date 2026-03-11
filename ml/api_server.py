@@ -7,6 +7,8 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import logging
+import hashlib
+import json
 import joblib
 import pandas as pd
 from feature_extraction import extract_features
@@ -32,14 +34,31 @@ RATE_LIMIT = os.getenv("RATE_LIMIT", "30/minute")
 
 # Load the model on startup via lifespan
 MODEL_PATH = "phishing_model.pkl"
+METADATA_PATH = "model_metadata.json"
 model = None
+model_metadata = None
 
 @asynccontextmanager
 async def lifespan(app):
-    global model
+    global model, model_metadata
     if os.path.exists(MODEL_PATH):
+        # Verify integrity if metadata exists
+        if os.path.exists(METADATA_PATH):
+            with open(METADATA_PATH, "r") as f:
+                model_metadata = json.load(f)
+            with open(MODEL_PATH, "rb") as f:
+                actual_hash = hashlib.sha256(f.read()).hexdigest()
+            expected_hash = model_metadata.get("sha256")
+            if expected_hash and actual_hash != expected_hash:
+                logger.error("Model integrity check FAILED. Expected SHA-256: %s, got: %s", expected_hash, actual_hash)
+                yield
+                return
+            logger.info("Model integrity verified (SHA-256: %s)", actual_hash[:16])
+        else:
+            logger.warning("No model_metadata.json found, skipping integrity check")
+            model_metadata = {"version": "unknown", "sha256": "unknown"}
         model = joblib.load(MODEL_PATH)
-        logger.info("Model loaded successfully from %s", MODEL_PATH)
+        logger.info("Model v%s loaded from %s", model_metadata.get("version", "unknown"), MODEL_PATH)
     else:
         logger.warning("Model not found at %s", MODEL_PATH)
     yield
@@ -103,6 +122,12 @@ class PredictionResponse(BaseModel):
     isMalicious: bool
     confidence: float
     features: dict
+
+@app.get("/model/info")
+def model_info():
+    if model_metadata is None:
+        raise HTTPException(status_code=503, detail="Model metadata not available")
+    return model_metadata
 
 @app.post("/predict", response_model=PredictionResponse)
 @limiter.limit(RATE_LIMIT)

@@ -6,6 +6,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 import joblib
+import hashlib
+import json
+from datetime import datetime, timezone
 
 data = pd.read_csv("data/dataset_phishing.csv")
 print("Dataset shape:", data.shape)
@@ -67,4 +70,24 @@ print("Random Forest Results")
 print(classification_report(y_test, rf_preds))
 joblib.dump(rf, "phishing_model.pkl")
 
-print("\nModel saved as phishing_model.pkl")
+# Generate model metadata with version and checksum
+with open("phishing_model.pkl", "rb") as f:
+    model_hash = hashlib.sha256(f.read()).hexdigest()
+
+metadata = {
+    "version": "1.0.0",
+    "algorithm": "RandomForestClassifier",
+    "n_estimators": 300,
+    "max_depth": 25,
+    "features": selected_features,
+    "sha256": model_hash,
+    "trained_at": datetime.now(timezone.utc).isoformat(),
+    "dataset_shape": list(data.shape),
+}
+
+with open("model_metadata.json", "w") as f:
+    json.dump(metadata, f, indent=2)
+
+print(f"\nModel saved as phishing_model.pkl")
+print(f"SHA-256: {model_hash}")
+print(f"Metadata saved to model_metadata.json")
