@@ -4,6 +4,16 @@ import { getCachedResult, cacheResult } from './storage.js';
 
 console.log('Nizhal Service Worker Loaded.');
 
+// Atomic counter increment to prevent race conditions with concurrent navigations
+async function incrementStat(key) {
+    return new Promise((resolve) => {
+        chrome.storage.local.get([key], (result) => {
+            const current = result[key] || 0;
+            chrome.storage.local.set({ [key]: current + 1 }, resolve);
+        });
+    });
+}
+
 // Listen for navigation events
 chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     const { url, tabId } = details;
@@ -12,7 +22,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     if (!url || url.startsWith('chrome://') || url.startsWith('about:') || url.startsWith('chrome-extension://')) return;
 
     // Check if Nizhal is active
-    const storageData = await chrome.storage.local.get(['nizhal_active', 'nizhal_whitelist', 'stats_scans', 'stats_threats']);
+    const storageData = await chrome.storage.local.get(['nizhal_active', 'nizhal_whitelist']);
     if (storageData.nizhal_active === false) return;
 
     // Check Whitelist
@@ -27,9 +37,8 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
         return; // Invalid URL
     }
 
-    // Increment Total Scans
-    const currentScans = storageData.stats_scans || 0;
-    chrome.storage.local.set({ stats_scans: currentScans + 1 });
+    // Increment Total Scans (atomic)
+    await incrementStat('stats_scans');
 
     console.log(`[Nizhal] Analyzing: ${url}`);
 
@@ -40,8 +49,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     if (heuristicResult.suspicious) {
         console.warn(`[Nizhal] THREAT DETECTED for ${url}`);
 
-        const currentThreats = (await chrome.storage.local.get('stats_threats')).stats_threats || 0;
-        chrome.storage.local.set({ stats_threats: currentThreats + 1 });
+        await incrementStat('stats_threats');
 
         const warningUrl = chrome.runtime.getURL('warning.html') +
             `?url=${encodeURIComponent(url)}&type=${encodeURIComponent('Heuristic Vibe Check')}&reason=${encodeURIComponent(heuristicResult.reason || 'Flagged by Heuristics')}`;
@@ -56,8 +64,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
         if (cachedResult.isMalicious) {
             console.warn(`[Nizhal] THREAT DETECTED (Cached) for ${url}`);
 
-            const currentThreats = (await chrome.storage.local.get('stats_threats')).stats_threats || 0;
-            chrome.storage.local.set({ stats_threats: currentThreats + 1 });
+            await incrementStat('stats_threats');
 
             const warningUrl = chrome.runtime.getURL('warning.html') +
                 `?url=${encodeURIComponent(url)}&type=${encodeURIComponent('Reputation Engine (Cached)')}&reason=${encodeURIComponent(cachedResult.reason)}`;
@@ -80,8 +87,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     if (reputationResult.isMalicious) {
         console.warn(`[Nizhal] THREAT DETECTED for ${url}`);
 
-        const currentThreats = (await chrome.storage.local.get('stats_threats')).stats_threats || 0;
-        chrome.storage.local.set({ stats_threats: currentThreats + 1 });
+        await incrementStat('stats_threats');
 
         const warningUrl = chrome.runtime.getURL('warning.html') +
             `?url=${encodeURIComponent(url)}&type=${encodeURIComponent('Reputation Engine')}&reason=${encodeURIComponent('Flagged by ML Backend')}`;
