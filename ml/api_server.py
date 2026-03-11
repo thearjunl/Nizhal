@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+import logging
 import joblib
 import pandas as pd
 from feature_extraction import extract_features
@@ -16,6 +17,12 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("nizhal")
 
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_SAFE_BROWSING_API_KEY")
@@ -32,9 +39,9 @@ async def lifespan(app):
     global model
     if os.path.exists(MODEL_PATH):
         model = joblib.load(MODEL_PATH)
-        print(f"Model loaded successfully from {MODEL_PATH}")
+        logger.info("Model loaded successfully from %s", MODEL_PATH)
     else:
-        print(f"Warning: Model not found at {MODEL_PATH}")
+        logger.warning("Model not found at %s", MODEL_PATH)
     yield
 
 limiter = Limiter(key_func=get_remote_address)
@@ -127,7 +134,7 @@ def predict_url(request: URLRequest, req: Request):
                         features={"source": "Google Safe Browsing API"}
                     )
         except Exception as e:
-            print(f"Safe Browsing API Error: {e}")
+            logger.error("Safe Browsing API Error: %s", e)
 
     # Fallback to ML Model: Extract features using the existing feature extraction logic
     features_dict = extract_features(request.url)
