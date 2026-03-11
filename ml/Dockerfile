@@ -12,6 +12,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the machine learning pipeline and model
 COPY . .
 
+# Train the model if it doesn't already exist
+RUN if [ ! -f phishing_model.pkl ]; then python train.py; fi
+
+# Verify the model file exists before building the final image
+RUN test -f phishing_model.pkl || (echo "ERROR: phishing_model.pkl not found after training" && exit 1)
+
 # Generate a self-signed certificate (valid for 365 days)
 # In production, mount real certificates via docker-compose volumes instead
 RUN mkdir -p /app/certs && \
