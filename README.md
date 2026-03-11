@@ -43,7 +43,14 @@ cp ml/.env.example ml/.env
 # Spin up the FastAPI backend
 docker-compose up --build
 ```
-*The server will start listening on `http://localhost:8000`.*
+*The server will start listening on `https://localhost:8000` with a self-signed TLS certificate.*
+
+> **Self-signed certificate note:** The Docker image auto-generates a self-signed SSL certificate for development. Chrome will reject requests to `https://127.0.0.1:8000` until you trust it:
+> 1. Open `https://127.0.0.1:8000/docs` in Chrome.
+> 2. Click **Advanced → Proceed to 127.0.0.1 (unsafe)**.
+> 3. The extension will now be able to reach the backend.
+>
+> For production, mount real certificates via `docker-compose.yml` volumes (see the comments in that file).
 
 ### 2. Load the Chrome Extension
 
