@@ -43,7 +43,13 @@
             const rawUrl = params.get('url');
             if (rawUrl) {
                 try {
-                    const host = new URL(rawUrl).hostname;
+                    const parsed = new URL(rawUrl);
+                    // Only allow http/https to prevent javascript: and other dangerous schemes
+                    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+                        console.warn('[Nizhal] Blocked navigation to non-http(s) URL');
+                        return;
+                    }
+                    const host = parsed.hostname;
                     chrome.storage.local.get(['nizhal_whitelist'], (result) => {
                         const whitelist = result.nizhal_whitelist || [];
                         if (!whitelist.includes(host)) {
@@ -56,7 +62,8 @@
                         }
                     });
                 } catch (e) {
-                    window.location.href = rawUrl;
+                    // URL parsing failed — do NOT navigate to prevent open redirect
+                    console.warn('[Nizhal] Blocked navigation to unparseable URL');
                 }
             }
         });
