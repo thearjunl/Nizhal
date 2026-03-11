@@ -7,7 +7,7 @@ import seaborn as sns
 def main():
     model = joblib.load("phishing_model.pkl")
     print("Model loaded successfully.")
-    data = pd.read_csv("dataset_phishing.csv")
+    data = pd.read_csv("data/dataset_phishing.csv")
     data["status"] = data["status"].map({
         "legitimate": 0,
         "phishing": 1
@@ -15,7 +15,23 @@ def main():
 
     data = data.dropna(subset=["status"])
     y = data["status"]
-    X = data.drop(["status", "url"], axis=1).fillna(0)
+    selected_features = [
+        'length_url',
+        'length_hostname',
+        'nb_dots',
+        'nb_hyphens',
+        'nb_at',
+        'nb_qm',
+        'nb_and',
+        'nb_eq',
+        'nb_percent',
+        'nb_slash',
+        'nb_www',
+        'nb_com',
+        'ratio_digits_url',
+        'nb_subdomains'
+    ]
+    X = data[selected_features].fillna(0)
     preds = model.predict(X)
 
     print("Model Evaluation Results")
