@@ -10,24 +10,36 @@
 </head>
 
 <body>
+    <div class="warning-backdrop"></div>
     <div class="shadow-container">
         <div class="shadow-header">
             <img class="nizhal-logo" src="icons/icon128.png" alt="Nizhal Logo">
             <h1>NIZHAL</h1>
-            <p>The Shadow has intercepted a threat.</p>
+            <p class="subtitle">The Shadow has intercepted a threat.</p>
         </div>
 
         <div class="threat-card">
-            <div class="icon-pulse">!</div>
+            <div class="threat-badge">
+                <span class="icon-pulse">&#9888;</span>
+            </div>
             <h2 id="threat-type">Suspicious Vibe Detected</h2>
-            <p id="threat-reason">The URL matches known malicious patterns.</p>
-            <p class="url-display" id="threat-url">example.com</p>
+            <p class="threat-desc" id="threat-reason">The URL matches known malicious patterns.</p>
+            <div class="url-display">
+                <span class="url-label">Blocked URL</span>
+                <code id="threat-url">example.com</code>
+            </div>
         </div>
 
         <div class="actions">
-            <button id="btn-back" class="btn primary">Return to Safety</button>
-            <button id="btn-proceed" class="btn secondary">Proceed Unsafe</button>
+            <button id="btn-back" class="btn primary">
+                <span class="btn-icon">&#8592;</span> Return to Safety
+            </button>
+            <button id="btn-proceed" class="btn secondary">
+                Proceed Anyway <span class="btn-icon">&#8594;</span>
+            </button>
         </div>
+
+        <p class="disclaimer">Nizhal blocked this page to protect you. If you believe this is a mistake, you can proceed at your own risk.</p>
     </div>
     <script src="warning.js"></script>
 </body>
