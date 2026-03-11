@@ -195,7 +195,8 @@ def predict_url(body: URLRequest, request: Request):
             
     except Exception as e:
         features_dict['nlp_flagged'] = False
-        features_dict['scrape_error'] = str(e)
+        features_dict['scrape_error'] = "Page content could not be analysed"
+        logger.warning("NLP scrape failed for %s: %s", body.url, e)
 
     return PredictionResponse(
         url=body.url,
