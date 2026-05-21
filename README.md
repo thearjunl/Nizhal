@@ -24,7 +24,7 @@ Nizhal is divided into two distinct parts:
 1.  **Frontend (Chrome Extension)**: Built with Manifest V3. Handles `webNavigation` interception, the popup dashboard UI, caching, and local heuristic execution.
 2.  **Backend (Python API)**: A lightweight FastAPI server containing the ML model (`scikit-learn`), feature extraction, NLP scraping (`BeautifulSoup4`), and Google Safe Browsing integration.
 
----
+---    
 
 ## 💻 Installation
 
